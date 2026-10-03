@@ -43,7 +43,7 @@ export default function SignUpPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 bg-background">
       <div className="w-full max-w-md p-6 sm:p-8 space-y-6 sm:space-y-8 bg-card border border-border rounded-xl shadow-sm">
-        <h1 className="text-3xl font-bold text-center text-foreground">Create Account</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-foreground">Create Account</h1>
         <form onSubmit={handleSignUp} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>

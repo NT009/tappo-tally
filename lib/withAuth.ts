@@ -40,7 +40,8 @@ export function withAuth(
         },
       };
 
-      return await handler(req, authContext, context?.params);
+      const params = context?.params ? await context.params : undefined;
+      return await handler(req, authContext, params);
     } catch (error) {
       console.error("API Error:", error);
       return NextResponse.json(

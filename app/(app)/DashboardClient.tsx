@@ -13,6 +13,18 @@ type Tally = {
   todayCount: number;
 };
 
+function getContrastColor(hexColor: string) {
+  if (!hexColor || !hexColor.startsWith('#')) return 'text-white';
+  
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  return luminance > 0.5 ? 'text-black' : 'text-white';
+}
+
 export default function DashboardClient() {
   const [tallies, setTallies] = useState<Tally[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,31 +140,29 @@ export default function DashboardClient() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {tallies.map(tally => {
           const isSyncing = syncingIds.has(tally._id);
+          const textColor = getContrastColor(tally.color);
           
           return (
             <button
               key={tally._id}
               onClick={() => handleIncrement(tally)}
               // Note: We deliberately do NOT disable the button during sync, allowing rapid endless tapping
-              className="relative flex flex-col items-center justify-center p-8 border border-border rounded-xl shadow-sm bg-card hover:scale-[1.02] active:scale-95 transition-all"
-              style={{ borderBottomWidth: 4, borderBottomColor: tally.color }}
+              className={`relative flex flex-col items-center justify-center p-4 sm:p-8 rounded-xl shadow-sm hover:scale-[1.02] active:scale-95 transition-all ${textColor}`}
+              style={{ backgroundColor: tally.color }}
             >
               {/* Sync Indicator */}
-              <div className="absolute top-4 right-4 h-5 flex items-center justify-center text-muted-foreground/40">
-                {isSyncing && <CloudUpload className="w-4 h-4 animate-pulse text-primary" />}
+              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 h-5 flex items-center justify-center opacity-50">
+                {isSyncing && <CloudUpload className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse" />}
               </div>
 
-              <span className="text-xl font-medium text-foreground mb-4">{tally.name}</span>
-              <div 
-                className="flex items-center justify-center w-24 h-24 rounded-full text-4xl font-bold text-white shadow-md select-none transition-transform active:scale-90"
-                style={{ backgroundColor: tally.color }}
-              >
+              <span className="text-sm sm:text-xl font-medium mb-1 sm:mb-4 truncate w-full px-2 text-center">{tally.name}</span>
+              <div className="text-4xl sm:text-6xl font-bold select-none transition-transform active:scale-90">
                 {tally.todayCount}
               </div>
-              <span className="text-sm text-muted-foreground mt-4 select-none">
+              <span className="text-[10px] sm:text-sm mt-1 sm:mt-4 select-none opacity-80">
                 Tap to add {tally.incrementRate}
               </span>
             </button>

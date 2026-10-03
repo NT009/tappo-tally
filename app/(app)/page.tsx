@@ -9,9 +9,9 @@ export default async function Home() {
 
   return (
     <div className="space-y-6">
-      <header className="pb-6 border-b border-sage/50">
-        <h1 className="text-3xl font-bold text-charcoal">Dashboard</h1>
-        <p className="text-charcoal/70 mt-1">Hello, {session?.user?.name || session?.user?.email?.split('@')[0]}!</p>
+      <header className="border-b border-sage/50 pb-2 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-charcoal">Dashboard</h1>
+        <p className="text-sm sm:text-base text-charcoal/70 mt-1">Hello, {session?.user?.name || session?.user?.email?.split('@')[0]}!</p>
       </header>
       
       <DashboardClient />

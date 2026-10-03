@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
   timezone: { type: String },
 }, {
   strict: false, // Because Better Auth manages other fields
+  collection: 'user', // Explicitly match better-auth's collection name
 });
 
 export default mongoose.models.user || mongoose.model('user', UserSchema);

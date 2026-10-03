@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Loader2, Plus, Edit2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,11 +64,7 @@ export default function TalliesClient() {
     setPage(1);
   }, [search]);
 
-  useEffect(() => {
-    fetchTallies();
-  }, [page, search]);
-
-  const fetchTallies = async () => {
+  const fetchTallies = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/tallies?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
@@ -82,7 +78,11 @@ export default function TalliesClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search]);
+
+  useEffect(() => {
+    fetchTallies();
+  }, [fetchTallies]);
 
   const openModal = (tally?: Tally) => {
     if (tally) {
@@ -176,7 +176,15 @@ export default function TalliesClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tallies.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center">
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : tallies.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
                   No tallies found.

@@ -77,7 +77,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pt-16 md:pt-0 p-4 sm:p-8">
+      <main className="flex-1 overflow-y-auto p-4 pt-20 sm:p-8 sm:pt-24 md:pt-8">
         <div className="max-w-5xl mx-auto pb-24 md:pb-0">
           {children}
         </div>

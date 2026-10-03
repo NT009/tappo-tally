@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
@@ -15,6 +15,11 @@ export default function HistoryClient() {
   const [entries, setEntries] = useState<Record<string, { date: string; count: number }[]>>({});
   const [loading, setLoading] = useState(true);
   
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  
   const [currentDate, setCurrentDate] = useState(dayjs());
   
   // Pagination
@@ -22,11 +27,7 @@ export default function HistoryClient() {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5;
 
-  useEffect(() => {
-    fetchData();
-  }, [currentDate, page]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const monthStr = currentDate.format("YYYY-MM");
@@ -48,7 +49,11 @@ export default function HistoryClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentDate, page, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const prevMonth = () => setCurrentDate(prev => prev.subtract(1, 'month'));
   const nextMonth = () => setCurrentDate(prev => prev.add(1, 'month'));
@@ -67,6 +72,24 @@ export default function HistoryClient() {
     });
   });
 
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const onMouseLeave = () => setIsDragging(false);
+  const onMouseUp = () => setIsDragging(false);
+
+  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between bg-card p-4 border border-border rounded-xl shadow-sm">
@@ -82,11 +105,20 @@ export default function HistoryClient() {
           No tallies found. Create one first.
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-xl shadow-sm overflow-x-auto">
+        <div
+          ref={scrollContainerRef}
+          onMouseDown={onMouseDown}
+          onMouseLeave={onMouseLeave}
+          onMouseUp={onMouseUp}
+          onMouseMove={onMouseMove}
+          className={`bg-card border border-border rounded-xl shadow-sm overflow-x-auto ${
+            isDragging ? "cursor-grabbing select-none" : "cursor-grab"
+          }`}
+        >
           <table className="w-full text-center border-collapse">
             <thead>
-              <tr className="bg-muted/50 border-b border-border">
-                <th className="p-3 text-left font-medium text-foreground sticky left-0 bg-muted/50 shadow-[1px_0_0_0_var(--border)] z-10 min-w-[150px]">Tally</th>
+              <tr className="bg-muted border-b border-border">
+                <th className="p-3 text-left font-medium text-foreground sticky left-0 bg-muted shadow-[1px_0_0_0_var(--border)] z-10 min-w-[150px]">Tally</th>
                 {daysArray.map(day => (
                   <th key={day} className="p-2 min-w-[40px] text-sm font-medium text-muted-foreground border-l border-border/50">{day}</th>
                 ))}
