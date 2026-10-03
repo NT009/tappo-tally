@@ -18,34 +18,31 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isLoading || !email.trim() || !password.trim()) return;
     
     setIsLoading(true);
     
     try {
-      await authClient.signIn.email({
+      const { data, error } = await authClient.signIn.email({
         email,
         password,
-      }, {
-        onError: (ctx) => {
-          toast.error(ctx.error.message || "Failed to sign in");
-          setIsLoading(false);
-        },
-        onSuccess: async () => {
-          try {
-            await fetch("/api/user/timezone", {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
-            });
-          } catch (err) {
-            console.error("Failed to sync timezone", err);
-          }
-          
-          toast.success("Successfully logged in!");
-          window.location.href = "/";
-        }
       });
+      
+      if (error) {
+        toast.error(error.message || "Failed to sign in");
+        setIsLoading(false);
+        return;
+      }
+
+      // Sync timezone in the background
+      fetch("/api/user/timezone", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+      }).catch(err => console.error("Failed to sync timezone", err));
+      
+      toast.success("Successfully logged in!");
+      window.location.href = "/";
     } catch (error: any) {
       toast.error(error?.message || "An unexpected error occurred");
       setIsLoading(false);

@@ -19,26 +19,26 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isLoading || !email.trim() || !password.trim() || !name.trim()) return;
     
     setIsLoading(true);
     
     try {
-      await authClient.signUp.email({
+      const { data, error } = await authClient.signUp.email({
         email,
         password,
         name,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      }, {
-        onError: (ctx) => {
-          toast.error(ctx.error.message || "Failed to create account");
-          setIsLoading(false);
-        },
-        onSuccess: async () => {
-          toast.success("Account created successfully!");
-          window.location.href = "/";
-        }
       });
+      
+      if (error) {
+        toast.error(error.message || "Failed to create account");
+        setIsLoading(false);
+        return;
+      }
+      
+      toast.success("Account created successfully!");
+      window.location.href = "/";
     } catch (error: any) {
       toast.error(error?.message || "An unexpected error occurred");
       setIsLoading(false);
