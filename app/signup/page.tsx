@@ -34,10 +34,9 @@ export default function SignUpPage() {
           toast.error(ctx.error.message || "Failed to create account");
           setIsLoading(false);
         },
-        onSuccess: () => {
+        onSuccess: async () => {
           toast.success("Account created successfully!");
-          router.refresh();
-          router.push("/");
+          window.location.href = "/";
         }
       });
     } catch (error: any) {
