@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# serwist PWA
+# next-pwa
 /public/sw.js
 /public/sw.js.map
+/public/workbox-*.js
+/public/fallback-*.js
+/public/sw.d.ts
