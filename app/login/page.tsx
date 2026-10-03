@@ -22,30 +22,35 @@ export default function LoginPage() {
     
     setIsLoading(true);
     
-    const { error: signInError } = await authClient.signIn.email({
-      email,
-      password,
-    });
-    
-    if (signInError) {
-      toast.error(signInError.message || "Failed to sign in");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await fetch("/api/user/timezone", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+      await authClient.signIn.email({
+        email,
+        password,
+      }, {
+        onError: (ctx) => {
+          toast.error(ctx.error.message || "Failed to sign in");
+          setIsLoading(false);
+        },
+        onSuccess: async () => {
+          try {
+            await fetch("/api/user/timezone", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+            });
+          } catch (err) {
+            console.error("Failed to sync timezone", err);
+          }
+          
+          toast.success("Successfully logged in!");
+          router.push("/");
+          router.refresh();
+        }
       });
-    } catch (err) {
-      console.error("Failed to sync timezone", err);
+    } catch (error: any) {
+      toast.error(error?.message || "An unexpected error occurred");
+      setIsLoading(false);
     }
-    
-    toast.success("Successfully logged in!");
-    router.push("/");
-    router.refresh();
   };
 
   return (

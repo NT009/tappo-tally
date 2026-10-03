@@ -22,22 +22,28 @@ export default function SignUpPage() {
     if (isLoading) return;
     
     setIsLoading(true);
-    const { error: signUpError } = await authClient.signUp.email({
-      email,
-      password,
-      name,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    });
     
-    if (signUpError) {
-      toast.error(signUpError.message || "Failed to create account");
+    try {
+      await authClient.signUp.email({
+        email,
+        password,
+        name,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      }, {
+        onError: (ctx) => {
+          toast.error(ctx.error.message || "Failed to create account");
+          setIsLoading(false);
+        },
+        onSuccess: () => {
+          toast.success("Account created successfully!");
+          router.push("/");
+          router.refresh();
+        }
+      });
+    } catch (error: any) {
+      toast.error(error?.message || "An unexpected error occurred");
       setIsLoading(false);
-      return;
     }
-    
-    toast.success("Account created successfully!");
-    router.push("/");
-    router.refresh();
   };
 
   return (
