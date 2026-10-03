@@ -43,8 +43,8 @@ export default function LoginPage() {
           }
           
           toast.success("Successfully logged in!");
-          router.push("/");
           router.refresh();
+          router.push("/");
         }
       });
     } catch (error: any) {
