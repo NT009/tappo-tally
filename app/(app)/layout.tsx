@@ -30,10 +30,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+  console.log(session);
 
   if (!session) {
     redirect("/login");
   }
+
+  
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
